@@ -29,6 +29,8 @@ function Player() {
     { id: "2", title: "Beautiful Things", uri: Beautiful_Things_mp3 },
   ]);
 
+
+  
   const pickDocument = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
@@ -40,7 +42,7 @@ function Player() {
         setTracks((prev) => [
           ...prev,
           {
-            id: (tracks.length + 1).toString(),
+            id: (prev.length + 1).toString(),
             title: result.assets[0].name,
             uri: result.assets[0].uri,
           },
@@ -101,24 +103,25 @@ function Player() {
     player.pause();
   };
 
-  const handlePrevTrack = () => {
+
+  const handlePrevTrack = async () => {
     if (currentTrackIndex > 0) {
-      console.log(typeof tracks[currentTrackIndex]);
-      if (typeof tracks[currentTrackIndex].uri === "string") {
-        player.remove();
-        player.replace(tracks[currentTrackIndex]);
-      }
       setCurrentTrackIndex((prev) => prev - 1);
+      if (typeof tracks[currentTrackIndex].uri === "string") {
+        player.pause();
+        await player.remove();
+        await player.replace(tracks[currentTrackIndex].uri);
+      }
     }
   };
 
-  const handleNextTrack = () => {
+  const handleNextTrack = async () => {
+    setCurrentTrackIndex((prev) => prev + 1);
     if (currentTrackIndex < tracks.length - 1) {
       if (typeof tracks[currentTrackIndex].uri === "string") {
-        player.remove();
-        player.replace(tracks[currentTrackIndex]);
-      }
-      setCurrentTrackIndex((prev) => prev + 1);
+        await player.remove();
+        await player.replace(tracks[currentTrackIndex]);
+      }   
     }
   };
   return (
@@ -175,6 +178,7 @@ function Player() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
