@@ -1,7 +1,7 @@
 import { AudioModule, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import React, { useEffect, useState } from "react";
-import Baby_Why_mp3 from "../assets/Sarah Cothran — Baby Why.mp3";
-import Beautiful_Things_mp3 from "../assets/Benson Boone - Beautiful Things.mp3";
+import Baby_Why_mp3 from "../../assets/Sarah Cothran — Baby Why.mp3";
+import Beautiful_Things_mp3 from "../../assets/Benson Boone - Beautiful Things.mp3";
 import {
   Alert,
   Button,
@@ -13,23 +13,28 @@ import {
 } from "react-native";
 
 import * as DocumentPicker from "expo-document-picker";
+import { useAudioPlayerController } from "@/src/hooks/useAudioPlayerController";
+import { TrackType } from "@/src/types/track";
 
-interface Track {
-  id: string;
-  title: string;
-  uri: string;
-}
 
-function Player() {
-  const [file, setFile] = useState<DocumentPicker.DocumentPickerResult | null>(
-    null
-  );
-  const [tracks, setTracks] = useState<Track[]>([
+const Player: React.FC = () => {
+  
+  const [file, setFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
+  const [tracks, setTracks] = useState<TrackType[]>([
     { id: "1", title: "Baby Why", uri: Baby_Why_mp3 },
     { id: "2", title: "Beautiful Things", uri: Beautiful_Things_mp3 },
   ]);
 
-
+  const {
+    currentTrackIndex,
+    isPlaying,
+    progressBar,
+    playerStatus,
+    handlePlay,
+    handlePause,
+    handleNextTrack,
+    handlePrevTrack
+  } = useAudioPlayerController(tracks);
   
   const pickDocument = async () => {
     try {
@@ -56,74 +61,7 @@ function Player() {
       Alert.alert("Error", "An error occurred while picking the file.");
     }
   };
-  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const player = useAudioPlayer(tracks[currentTrackIndex].uri);
 
-  const playerStatus = useAudioPlayerStatus(player);
-  const [progressBar, setProgressBar] = useState<number>(0);
-
-  useEffect(() => {
-    const configureAudioMode = async () => {
-      AudioModule.setAudioModeAsync({
-        playsInSilentMode: true,
-        shouldPlayInBackground: true,
-        shouldRouteThroughEarpiece: false,
-      });
-    };
-    configureAudioMode();
-  }, []);
-
-  useEffect(() => {
-    const trackListenedInSeconds = Math.floor(playerStatus.currentTime / 1000);
-    const trackDurationInSeconds = Math.floor(playerStatus.duration / 1000);
-    if (trackDurationInSeconds > 0) {
-      setProgressBar(
-        Math.max(
-          0,
-          Math.min(100, trackListenedInSeconds / trackDurationInSeconds) * 100
-        )
-      );
-    }
-  }, [playerStatus]);
-
-  useEffect(() => {
-    if (isPlaying) {
-      player.play();
-    }
-  }, [player.id]);
-
-  const handlePlay = () => {
-    setIsPlaying(true);
-    player.play();
-  };
-
-  const handlePause = () => {
-    setIsPlaying(false);
-    player.pause();
-  };
-
-
-  const handlePrevTrack = async () => {
-    if (currentTrackIndex > 0) {
-      setCurrentTrackIndex((prev) => prev - 1);
-      if (typeof tracks[currentTrackIndex].uri === "string") {
-        player.pause();
-        await player.remove();
-        await player.replace(tracks[currentTrackIndex].uri);
-      }
-    }
-  };
-
-  const handleNextTrack = async () => {
-    setCurrentTrackIndex((prev) => prev + 1);
-    if (currentTrackIndex < tracks.length - 1) {
-      if (typeof tracks[currentTrackIndex].uri === "string") {
-        await player.remove();
-        await player.replace(tracks[currentTrackIndex]);
-      }   
-    }
-  };
   return (
     <View style={styles.container}>
       <Button title="Загрузить трек" onPress={pickDocument} />

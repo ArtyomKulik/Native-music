@@ -1,7 +1,7 @@
 import { Text } from '@react-navigation/elements';
 import React, { memo } from 'react'
 import { View, StyleSheet } from 'react-native';
-import Player from '../../player/Player';
+import Player from '../../ui/player/Player';
 
 function Home() {
   return (
