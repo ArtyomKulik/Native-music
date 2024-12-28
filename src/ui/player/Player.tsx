@@ -1,20 +1,20 @@
 import React, { memo } from "react";
-
 import {
   StyleSheet,
   Text,
 } from "react-native";
-
 import { useAudioPlayerController } from "@/src/hooks/useAudioPlayerController";
-import { TrackType } from "@/src/types/track";
+import { TrackType, UseAudioPlayerControllerType } from "@/src/types/track";
 import PlayerControls from "./PlayerControls";
 import  ProgressBar from "./ProgressBar";
+import * as Notifications from 'expo-notifications';
 
 interface PlayerPropsType {
-  tracks: TrackType[]
+  tracks: TrackType[],
+  playerControlsProps: UseAudioPlayerControllerType
 }
 
-const Player: React.FC<PlayerPropsType> = memo(({tracks}) => {
+const Player: React.FC<PlayerPropsType> = memo(({tracks, playerControlsProps}) => {
 
   const {
     currentTrackIndex,
@@ -25,9 +25,12 @@ const Player: React.FC<PlayerPropsType> = memo(({tracks}) => {
     handlePause,
     handleNextTrack,
     handlePrevTrack
-  } = useAudioPlayerController(tracks);
+  } = playerControlsProps
 
   const currentTrackTitle = tracks[currentTrackIndex].title
+
+
+
   return (
     <>
           <Text style={styles.nowPlayingText}>{isPlaying ? `Играет: ${currentTrackTitle}` : `Текущий трек: ${currentTrackTitle}`}</Text>

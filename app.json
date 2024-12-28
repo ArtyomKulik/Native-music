@@ -24,7 +24,9 @@
       "permissions": [
         "WAKE_LOCK",
         "RECORD_AUDIO",
-        "FOREGROUND_SERVICE_MICROPHONE"
+        "FOREGROUND_SERVICE_MICROPHONE",
+        "FOREGROUND_SERVICE",
+         "POST_NOTIFICATIONS"
       ]
     },
     "web": {

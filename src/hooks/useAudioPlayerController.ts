@@ -1,6 +1,6 @@
-import { AudioModule, AudioStatus, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
+import { AudioModule, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useEffect, useState } from "react";
-import { TrackType } from "../types/track";
+import { TrackType, UseAudioPlayerControllerType } from "../types/track";
 
 interface AudioPlayerState {
     currentTrackIndex: number;
@@ -8,16 +8,6 @@ interface AudioPlayerState {
     progressBar: number;
   }
 
-interface UseAudioPlayerControllerType {
-  currentTrackIndex: number;
-  isPlaying: boolean;
-  progressBar: number;
-  playerStatus: AudioStatus;
-  handlePlay: () => void;
-  handlePause: () => void;
-  handleNextTrack: () => Promise<void>;
-  handlePrevTrack: () => Promise<void>;
-}
 
 export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex = 0): UseAudioPlayerControllerType => {
     const [audioPlayerState, setAudioPlayerState] = useState<AudioPlayerState>({
@@ -57,14 +47,19 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
             }
           }, [player.id]);
 
-          const handlePlay = () => {
+       
+
+          const handlePlay = async () => {
             setAudioPlayerState(prev => ({ ...prev, isPlaying: true }));
             player.play();
+          
+            
           }
 
-          const handlePause = () => {
+          const handlePause = async () => {
             setAudioPlayerState(prev => ({ ...prev, isPlaying: false }));
             player.pause();
+            
           }
 
 

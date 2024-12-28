@@ -9,7 +9,6 @@ interface AddLocalTrackFilePropsType {
 }
 
  const AddLocalTrackFile: FC<AddLocalTrackFilePropsType> = ({setTracks}) => {
-    const [file, setFile] = useState<DocumentPicker.DocumentPickerResult | null>(null);
 
     const pickDocument = async () => {
         try {
@@ -18,7 +17,6 @@ interface AddLocalTrackFilePropsType {
             copyToCacheDirectory: true,
           });
           if (!result.canceled && result.assets[0].mimeType === "audio/mpeg") {
-            setFile(result);
             setTracks((prev) => [
               ...prev,
               {
