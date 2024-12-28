@@ -8,7 +8,7 @@ interface AudioPlayerState {
     progressBar: number;
   }
 
-interface UseAudioPlayerReturn {
+interface UseAudioPlayerControllerType {
   currentTrackIndex: number;
   isPlaying: boolean;
   progressBar: number;
@@ -19,7 +19,7 @@ interface UseAudioPlayerReturn {
   handlePrevTrack: () => Promise<void>;
 }
 
-export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex = 0): UseAudioPlayerReturn => {
+export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex = 0): UseAudioPlayerControllerType => {
     const [audioPlayerState, setAudioPlayerState] = useState<AudioPlayerState>({
         currentTrackIndex: initialTrackIndex,
         isPlaying: false,
@@ -49,7 +49,7 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
               progressBar: Math.max(0, Math.min(100, trackListenedInSeconds / trackDurationInSeconds) * 100)
             }));
           }
-        }, [playerStatus]);
+        }, [playerStatus.currentTime]);
 
         useEffect(() => {
             if (audioPlayerState.isPlaying) {
