@@ -1,6 +1,7 @@
 import { AudioModule, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TrackType, UseAudioPlayerControllerType } from "../types/track";
+import { GestureResponderEvent, Platform } from "react-native";
 
 interface AudioPlayerState {
     currentTrackIndex: number;
@@ -10,6 +11,8 @@ interface AudioPlayerState {
 
 
 export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex = 0): UseAudioPlayerControllerType => {
+    
+
     const [audioPlayerState, setAudioPlayerState] = useState<AudioPlayerState>({
         currentTrackIndex: initialTrackIndex,
         isPlaying: false,
@@ -18,6 +21,8 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
 
       const player = useAudioPlayer(tracks[audioPlayerState.currentTrackIndex].uri);
       const playerStatus = useAudioPlayerStatus(player);
+
+
 
       useEffect(() => {
         const configureAudioMode = async () => {
@@ -89,6 +94,26 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
               }
             }
           }
+
+
+
+
+          const handleProgressBarSeek = (width: number, event: GestureResponderEvent | MouseEvent): void => {
+            if(Platform.OS === 'android') {
+              const { locationX } = (event as GestureResponderEvent).nativeEvent;
+              const percentage = locationX / width; 
+              const newTime = percentage * player.duration;
+              player.seekTo(newTime);
+              
+            } if(Platform.OS === 'web') {
+              const { clientX } = event as MouseEvent; 
+              const percentage = clientX / width;
+              const newTime = percentage * player.duration;
+              player.seekTo(newTime);
+            }
+
+           
+          };
     
     return {
         currentTrackIndex: audioPlayerState.currentTrackIndex,
@@ -99,5 +124,6 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
         handlePause,
         handleNextTrack,
         handlePrevTrack,
+        handleProgressBarSeek,
     };
   };

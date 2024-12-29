@@ -1,32 +1,34 @@
+import { useAudioPlayerController } from '@/src/hooks/useAudioPlayerController';
 import React, { memo } from 'react';
-import { View, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
+import { View, StyleSheet, Animated, Dimensions, Platform, TouchableOpacity, GestureResponderEvent } from 'react-native';
 
 interface ProgressBarProps {
   progress: number;
+  handleProgressBarSeek: (width: number, event: GestureResponderEvent) => void
 }
 
- const ProgressBar = ({ progress }: ProgressBarProps) => {
+ const ProgressBar = ({ handleProgressBarSeek, progress }: ProgressBarProps) => {
+
     const screenWidth = Dimensions.get('window').width;
     const progressWidthAndroid = (Math.round(progress) / 100) * screenWidth;
    const progressBarDimension:  number | `${number}%` = Platform.OS === 'android' ? progressWidthAndroid : `${progress}%`
    
-
   return (
-    <View style={styles.container}>
+    <TouchableOpacity style={styles.container}  onPress={(event) => handleProgressBarSeek(screenWidth, event)}>
       <Animated.View
         style={[
           styles.progress, 
           { width: progressBarDimension }
         ]} 
       />
-    </View>
+    </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     minWidth: '100%',
-    height: 10,
+    height: 16,
     backgroundColor: '#e0e0e0',
     overflow: 'hidden',
     

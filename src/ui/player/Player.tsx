@@ -3,19 +3,17 @@ import {
   StyleSheet,
   Text,
 } from "react-native";
-import { useAudioPlayerController } from "@/src/hooks/useAudioPlayerController";
-import { TrackType, UseAudioPlayerControllerType } from "@/src/types/track";
+import { UseAudioPlayerControllerType } from "@/src/types/track";
 import PlayerControls from "./PlayerControls";
 import  ProgressBar from "./ProgressBar";
-import * as Notifications from 'expo-notifications';
+import { useTrackStore } from "@/src/zustand/trackStore";
 
 interface PlayerPropsType {
-  tracks: TrackType[],
   playerControlsProps: UseAudioPlayerControllerType
 }
 
-const Player: React.FC<PlayerPropsType> = memo(({tracks, playerControlsProps}) => {
-
+const Player: React.FC<PlayerPropsType> = memo(({playerControlsProps}) => {
+const {tracks} = useTrackStore()
   const {
     currentTrackIndex,
     isPlaying,
@@ -24,17 +22,18 @@ const Player: React.FC<PlayerPropsType> = memo(({tracks, playerControlsProps}) =
     handlePlay,
     handlePause,
     handleNextTrack,
-    handlePrevTrack
+    handlePrevTrack,
+    handleProgressBarSeek
   } = playerControlsProps
+
+
 
   const currentTrackTitle = tracks[currentTrackIndex].title
 
-
-
   return (
     <>
-          <Text style={styles.nowPlayingText}>{isPlaying ? `Играет: ${currentTrackTitle}` : `Текущий трек: ${currentTrackTitle}`}</Text>
-     <ProgressBar progress={progressBar}/>
+          <Text style={styles.nowPlayingText}>{isPlaying ? `Играет: ${currentTrackTitle}` : `На паузе: ${currentTrackTitle}`}</Text>
+     <ProgressBar handleProgressBarSeek={handleProgressBarSeek} progress={progressBar}/>
       <PlayerControls
         handlePlay={handlePlay}
         handlePause={handlePause}

@@ -1,15 +1,11 @@
-import React, { FC, useState } from 'react'
+import React, { FC } from 'react'
 import { Alert, Button} from 'react-native'
 import * as DocumentPicker from "expo-document-picker";
-import { TrackType } from '@/src/types/track';
+import { useTrackStore } from '@/src/zustand/trackStore';
 
+ const AddLocalTrackFile: FC = () => {
 
-interface AddLocalTrackFilePropsType {
-    setTracks: React.Dispatch<React.SetStateAction<TrackType[]>>
-}
-
- const AddLocalTrackFile: FC<AddLocalTrackFilePropsType> = ({setTracks}) => {
-
+  const {addTrack, tracks} = useTrackStore()
     const pickDocument = async () => {
         try {
           const result = await DocumentPicker.getDocumentAsync({
@@ -17,14 +13,13 @@ interface AddLocalTrackFilePropsType {
             copyToCacheDirectory: true,
           });
           if (!result.canceled && result.assets[0].mimeType === "audio/mpeg") {
-            setTracks((prev) => [
-              ...prev,
+            addTrack(
               {
-                id: (prev.length + 1).toString(),
+                id: (tracks.length + 1).toString(),
                 title: result.assets[0].name,
                 uri: result.assets[0].uri,
               },
-            ]);
+            );
             Alert.alert(`Выбран файл, URI: ${result.assets[0].uri}`);
           } else {
             Alert.alert("Ошибка");

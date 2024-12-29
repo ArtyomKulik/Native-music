@@ -1,8 +1,11 @@
 import { TrackType } from "@/src/types/track";
+import { useTrackStore } from "@/src/zustand/trackStore";
+import { useAudioPlayer } from "expo-audio";
 import { FC, memo } from "react";
 import { FlatList, StyleSheet, Text } from "react-native";
 
-export const TrackList: FC<{tracks: TrackType[]}> = memo(({ tracks }) => {
+export const TrackList: FC = memo(() => {
+  const {tracks} = useTrackStore()
     return (
         <FlatList
         style={styles.list}

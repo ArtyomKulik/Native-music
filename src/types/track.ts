@@ -1,4 +1,5 @@
 import { AudioStatus } from "expo-audio";
+import { GestureResponderEvent } from "react-native";
 
 export type TrackType = {
     id: string;
@@ -15,5 +16,6 @@ export type UseAudioPlayerControllerType = {
     handlePause: () => void;
     handleNextTrack: () => Promise<void>;
     handlePrevTrack: () => Promise<void>;
+    handleProgressBarSeek: (width: number, event: GestureResponderEvent) => void
   }
 
