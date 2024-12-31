@@ -1,7 +1,8 @@
 import { AudioModule, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TrackType, UseAudioPlayerControllerType } from "../types/track";
-import { GestureResponderEvent, Platform } from "react-native";
+import { GestureResponderEvent, Platform, AppState } from "react-native";
+import * as Notifications from 'expo-notifications';
 
 interface AudioPlayerState {
     currentTrackIndex: number;
@@ -10,7 +11,17 @@ interface AudioPlayerState {
   }
 
 
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: false,
+      shouldSetBadge: false,
+      priority: Notifications.AndroidNotificationPriority.MAX
+    }),
+  });
+
 export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex = 0): UseAudioPlayerControllerType => {
+
   useEffect(() => {
     const configureAudioMode = async () => {
       AudioModule.setAudioModeAsync({
@@ -31,7 +42,6 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
 
       const player = useAudioPlayer(tracks[audioPlayerState.currentTrackIndex].uri);
       const playerStatus = useAudioPlayerStatus(player);
-     
 
       useEffect(() => {
         const trackListenedInSeconds = Math.floor(playerStatus.currentTime / 1000);
@@ -50,18 +60,78 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
             }
           }, [player.id]);
 
-       
+
+
+
+// Notification logic
+          if(Platform.OS === 'android' || Platform.OS === 'ios') {
+          const notificationIdRef = useRef<string | null>(null);
+          useEffect(() => {
+            const currentTrack = tracks[audioPlayerState.currentTrackIndex];
+
+            Notifications.setNotificationCategoryAsync('audio-controls', [
+              {
+                identifier: 'previous',
+                buttonTitle: 'Previous',
+              },
+              {
+                identifier:  audioPlayerState.isPlaying ? 'pause' : 'play',
+                buttonTitle: audioPlayerState.isPlaying ? '<button>pause</button>' : 'Play', // fixed P
+              },
+              {
+                identifier: 'next',
+                buttonTitle: 'Next',
+              },
+           
+              ]);
+
+              Notifications.scheduleNotificationAsync({
+                content: {
+                  title: currentTrack.title,
+                  body: `Playing: ${currentTrack.title}`,
+                  data: { trackId: currentTrack.id}, 
+                  categoryIdentifier: 'audio-controls', 
+                },
+                trigger: null,
+                
+              }).then(id=>  notificationIdRef.current = id).catch()
+              
+              return () => {
+               notificationIdRef.current && Notifications.dismissNotificationAsync(notificationIdRef.current)
+              }
+          }, [player, tracks[audioPlayerState.currentTrackIndex].uri, audioPlayerState.isPlaying])
+
+          useEffect(() => {
+            const subscription = Notifications.addNotificationResponseReceivedListener(response => {
+            const action = response.actionIdentifier
+        
+              if (action === 'play') {
+                handlePlay();
+              } else if (action === 'pause') {
+                handlePause(); 
+              } else if (action === 'next') {
+                handleNextTrack();
+              } else if (action === 'previous') {
+                handlePrevTrack();
+              } else {
+                throw new Error(response.actionIdentifier)
+              }
+            });
+        
+            return () => {
+              subscription.remove(); 
+            };
+          }, [notificationIdRef.current]);  
+          }
 
           const handlePlay = async () => {
             setAudioPlayerState(prev => ({ ...prev, isPlaying: true }));
-            player.play();
-          
-            
+            await player.play();
           }
 
           const handlePause = async () => {
             setAudioPlayerState(prev => ({ ...prev, isPlaying: false }));
-            player.pause();
+            await player.pause();
             
           }
 
@@ -69,32 +139,38 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
           const handlePrevTrack = async () => {
             if (audioPlayerState.currentTrackIndex > 0) {
             try {
+             
               await player.remove();
               setAudioPlayerState(prev => ({
                 ...prev,
-                currentTrackIndex: prev.currentTrackIndex - 1
+                currentTrackIndex: prev.currentTrackIndex - 1,
+                progressBar: 0
               }));
+             
               if (typeof tracks[audioPlayerState.currentTrackIndex].uri === "string") {
                 await player.replace(tracks[audioPlayerState.currentTrackIndex].uri);
               }
-            } catch {}
+            } catch (error: any) {
+                throw new Error(error)
+            }
             }
         }
         const handleNextTrack = async () => {
-            if (audioPlayerState.currentTrackIndex < tracks.length - 1) {
+                if (audioPlayerState.currentTrackIndex < tracks.length - 1) {
+          try {
               await player.remove();
               setAudioPlayerState(prev => ({
                 ...prev,
-                currentTrackIndex: prev.currentTrackIndex + 1
+                currentTrackIndex: prev.currentTrackIndex + 1,
+                progressBar: 0
               }));
               if (typeof tracks[audioPlayerState.currentTrackIndex].uri === "string") {
                 await player.replace(tracks[audioPlayerState.currentTrackIndex].uri);
               }
             }
+              catch (error: any) {throw new Error(error)}
+            }
           }
-
-
-
 
           const handleProgressBarSeek = (width: number, event: GestureResponderEvent | MouseEvent): void => {
             if(Platform.OS === 'android') {
@@ -109,7 +185,6 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
               const newTime = percentage * player.duration;
               player.seekTo(newTime);
             }
-
            
           };
     
