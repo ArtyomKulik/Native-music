@@ -9,7 +9,7 @@ interface ProgressBarProps {
 
  const ProgressBar = ({ handleProgressBarSeek, progress }: ProgressBarProps) => {
 
-    const screenWidth = Dimensions.get('window').width;
+    const screenWidth = Dimensions.get('window').width - 32;
     const progressWidthAndroid = (Math.round(progress) / 100) * screenWidth;
    const progressBarDimension:  number | `${number}%` = Platform.OS === 'android' ? progressWidthAndroid : `${progress}%`
    

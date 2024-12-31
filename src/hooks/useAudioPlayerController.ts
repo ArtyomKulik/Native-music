@@ -1,5 +1,5 @@
 import { AudioModule, useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { TrackType, UseAudioPlayerControllerType } from "../types/track";
 import { GestureResponderEvent, Platform } from "react-native";
 
@@ -11,7 +11,17 @@ interface AudioPlayerState {
 
 
 export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex = 0): UseAudioPlayerControllerType => {
-    
+  useEffect(() => {
+    const configureAudioMode = async () => {
+      AudioModule.setAudioModeAsync({
+        playsInSilentMode: true,
+        shouldPlayInBackground: true,
+        shouldRouteThroughEarpiece: false,
+        interruptionMode: "doNotMix",
+      });
+    };
+    configureAudioMode();
+  }, []);
 
     const [audioPlayerState, setAudioPlayerState] = useState<AudioPlayerState>({
         currentTrackIndex: initialTrackIndex,
@@ -21,19 +31,7 @@ export const useAudioPlayerController = (tracks: TrackType[], initialTrackIndex 
 
       const player = useAudioPlayer(tracks[audioPlayerState.currentTrackIndex].uri);
       const playerStatus = useAudioPlayerStatus(player);
-
-
-
-      useEffect(() => {
-        const configureAudioMode = async () => {
-          AudioModule.setAudioModeAsync({
-            playsInSilentMode: true,
-            shouldPlayInBackground: true,
-            shouldRouteThroughEarpiece: false,
-          });
-        };
-        configureAudioMode();
-      }, []);
+     
 
       useEffect(() => {
         const trackListenedInSeconds = Math.floor(playerStatus.currentTime / 1000);

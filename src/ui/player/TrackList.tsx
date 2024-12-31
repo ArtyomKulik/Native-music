@@ -13,6 +13,7 @@ export const TrackList: FC = memo(() => {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <Text>{item.title}</Text>}
         />
+      
       );
 } )
 

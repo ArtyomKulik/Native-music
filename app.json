@@ -15,18 +15,16 @@
       }
     },
     "android": {
-      
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.artemdeveloper.com",
       "permissions": [
-        "WAKE_LOCK",
-        "RECORD_AUDIO",
-        "FOREGROUND_SERVICE_MICROPHONE",
-        "FOREGROUND_SERVICE",
-         "POST_NOTIFICATIONS"
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE_MICROPHONE",
+        "android.permission.FOREGROUND_SERVICE",
+         "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "web": {
@@ -36,6 +34,11 @@
     },
     "plugins": [
       "expo-router",
+      [
+        "@react-native-google-signin/google-signin", {
+        "iosUrlScheme": "com.googleusercontent.apps._some_id_here_"
+      }
+    ],
       [
         "expo-splash-screen",
         {
